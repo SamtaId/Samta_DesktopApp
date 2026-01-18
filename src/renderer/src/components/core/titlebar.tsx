@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -29,6 +29,7 @@ import {
   Warning
 } from '@mui/icons-material'
 import { IOutlet } from '@renderer/interface/outlet.interface'
+import { useNavigate } from 'react-router-dom'
 
 interface TitleBarProps {
   title?: string
@@ -39,6 +40,7 @@ interface TitleBarProps {
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', onLogout }) => {
+  const navigate = useNavigate()
   // OUTLET LOGIC
   const [currentOutletId, setCurrentOutletId] = useState<IOutlet | null>(null)
   const [outlets, setOutlets] = useState<IOutlet[]>([])
@@ -140,6 +142,26 @@ export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', o
     }
     return name.substring(0, 2).toUpperCase()
   }
+
+  // const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+        e.preventDefault()
+        navigate('/xyz/info')
+      }
+
+      if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
+        e.preventDefault()
+        window.location.reload()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
 
   return (
     <>

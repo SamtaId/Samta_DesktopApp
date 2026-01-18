@@ -98,7 +98,7 @@ const SidebarLogLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
 const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
   const { element, protected: isProtected, path } = route
 
-  if (!isProtected && path === '/login') {
+  if (!isProtected && (path === '/login' || path === '/xyz/info')) {
     return <Route key={key} path={path} element={<LoginOnlyLayout>{element}</LoginOnlyLayout>} />
   }
 
@@ -124,13 +124,10 @@ const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
 const App: React.FC = () => {
   const { fetchConfig, isLoading } = useConfigStore()
 
-  // window.addEventListener('beforeunload', () => {
-  //   localStorage.clear()
-  // })
-
   useEffect(() => {
     fetchConfig()
   }, [])
+
   if (isLoading) return <p>Loading...</p>
 
   return (

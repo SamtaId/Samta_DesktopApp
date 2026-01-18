@@ -1,9 +1,10 @@
 import { IAppRoute } from '@renderer/interface/config.interface'
-import { LoginPage, CreateTransactionPage, ListTransactionPage } from '@renderer/pages'
+import { LoginPage, CreateTransactionPage, ListTransactionPage, InfoAppPage } from '@renderer/pages'
 
 export const appRoutes: IAppRoute[] = [
   // =============== PUBLIC ROUTES ===============
   { path: '/login', element: <LoginPage />, active: true, protected: false },
+  { path: '/xyz/info', element: <InfoAppPage />, active: true, protected: false },
 
   // =============== PROTECTED ROUTES ===============
   {

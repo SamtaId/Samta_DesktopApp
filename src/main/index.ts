@@ -1,12 +1,14 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import path from 'path'
 import { readFileSync } from 'fs'
+import { autoUpdater } from 'electron-updater'
 
+let mainWindow: BrowserWindow
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -147,6 +149,47 @@ ipcMain.on('window-close', (event) => {
   const window = BrowserWindow.fromWebContents(event.sender)
   window?.webContents.executeJavaScript('localStorage.clear()')
   window?.close()
+})
+
+// Event dari tombol "Cek Update"
+ipcMain.on('check-for-updates', () => {
+  autoUpdater.checkForUpdates()
+})
+
+// Konfigurasi auto update
+autoUpdater.autoDownload = false
+
+autoUpdater.on('update-available', () => {
+  dialog
+    .showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update tersedia',
+      message: 'Versi baru tersedia. Mau download sekarang?',
+      buttons: ['Ya', 'Nanti']
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.downloadUpdate()
+      }
+    })
+})
+
+autoUpdater.on('download-progress', (progressObj) => {
+  const progress = Math.round(progressObj.percent)
+  if (mainWindow) {
+    mainWindow.webContents.send('update:download-progress', progress)
+  }
+})
+
+autoUpdater.on('update-downloaded', () => {
+  dialog
+    .showMessageBox(mainWindow, {
+      title: 'Update Siap',
+      message: 'Update telah diunduh. Aplikasi akan restart untuk update.'
+    })
+    .then(() => {
+      autoUpdater.quitAndInstall()
+    })
 })
 
 app.on('window-all-closed', () => {
