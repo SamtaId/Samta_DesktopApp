@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import Snackbar from '@mui/material/Snackbar'
+import MuiAlert from '@mui/material/Alert'
 import {
   AppBar,
   Toolbar,
@@ -16,7 +18,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  LinearProgress
 } from '@mui/material'
 import {
   Minimize,
@@ -28,8 +31,8 @@ import {
   KeyboardArrowDown,
   Warning
 } from '@mui/icons-material'
+import { Update as UpdateIcon } from '@mui/icons-material'
 import { IOutlet } from '@renderer/interface/outlet.interface'
-import { useNavigate } from 'react-router-dom'
 
 interface TitleBarProps {
   title?: string
@@ -37,20 +40,33 @@ interface TitleBarProps {
   theme?: 'light' | 'dark'
   onThemeToggle?: () => void
   onLogout?: () => void
+  showUpdateButton?: boolean
 }
 
-export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', onLogout }) => {
-  const navigate = useNavigate()
+export const TitleBar: React.FC<TitleBarProps> = ({
+  username,
+  theme = 'light',
+  onLogout,
+  showUpdateButton = false
+}) => {
   // OUTLET LOGIC
   const [currentOutletId, setCurrentOutletId] = useState<IOutlet | null>(null)
   const [outlets, setOutlets] = useState<IOutlet[]>([])
   const [userEmail, setUserEmail] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('')
   const [openCloseDialog, setOpenCloseDialog] = useState(false)
-
+  const [openedProgress, setOpenedProgress] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
   // PROFILE MENU
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const openProfileMenu = Boolean(anchorEl)
+
+  // Snackbar untuk update info
+  const [updateInfoOpen, setUpdateInfoOpen] = useState(false)
+  const [updateInfoMsg, setUpdateInfoMsg] = useState('')
+  const [updateInfoSeverity, setUpdateInfoSeverity] = useState<
+    'info' | 'success' | 'warning' | 'error'
+  >('info')
 
   React.useEffect(() => {
     try {
@@ -112,6 +128,39 @@ export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', o
     }
   }
 
+  useEffect(() => {
+    const handleProgress = (_event: unknown, percent: number): void => {
+      setDownloadProgress(percent)
+      setOpenedProgress(true)
+      if (percent >= 100) {
+        setTimeout(() => setOpenedProgress(false), 2000)
+      }
+    }
+
+    const handleUpdateNotification = (_event: unknown, msg: string, type: string): void => {
+      setUpdateInfoMsg(msg)
+      setUpdateInfoSeverity(type === 'latest' ? 'success' : 'info')
+      setUpdateInfoOpen(true)
+    }
+
+    window.electron.ipcRenderer.on('update:download-progress', handleProgress)
+    window.electron.ipcRenderer.on('update:notification', handleUpdateNotification)
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('update:download-progress')
+      window.electron.ipcRenderer.removeAllListeners('update:notification')
+    }
+  }, [])
+
+  // const handleCheckUpdates = (): void => {
+  //   try {
+  //     notifier.show({ message: 'Memeriksa pembaruan...', severity: 'info' })
+  //     window.electron.ipcRenderer.send('check-for-updates')
+  //   } catch (e) {
+  //     console.error('Failed to request update check', e)
+  //     notifier.show({ message: 'Gagal memeriksa pembaruan', severity: 'error' })
+  //   }
+  // }
+
   const handleMinimize = (): void => {
     window.electron?.ipcRenderer.send('window-minimize')
   }
@@ -144,24 +193,6 @@ export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', o
   }
 
   // const navigate = useNavigate()
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
-        e.preventDefault()
-        navigate('/xyz/info')
-      }
-
-      if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
-        e.preventDefault()
-        window.location.reload()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [])
 
   return (
     <>
@@ -242,6 +273,28 @@ export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', o
 
           {/* RIGHT - User Profile & Window Controls */}
           <Box display="flex" alignItems="center" gap={1} sx={{ WebkitAppRegion: 'no-drag' }}>
+            {/* Update button (optional) - shown when `showUpdateButton` is true */}
+            {showUpdateButton && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<UpdateIcon />}
+                onClick={() => {
+                  window.electron.ipcRenderer.send('check-for-updates')
+                }}
+                sx={{
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.18)',
+                  minWidth: 36,
+                  py: 0.5,
+                  px: 1,
+                  textTransform: 'none',
+                  '&:hover': { borderColor: 'rgba(255,255,255,0.28)' }
+                }}
+              >
+                Update
+              </Button>
+            )}
             {/* User Profile Button */}
             {username && (
               <Box
@@ -477,6 +530,53 @@ export const TitleBar: React.FC<TitleBarProps> = ({ username, theme = 'light', o
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={openedProgress}
+        onClose={() => setOpenedProgress(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 340,
+            p: 2
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <UpdateIcon color="primary" />
+            <Typography variant="h6" fontWeight={700}>
+              Mengunduh Pembaruan...
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" mb={2}>
+            Update sedang diunduh...
+          </Typography>
+          <Box sx={{ width: '100%', mb: 1 }}>
+            <LinearProgress variant="determinate" value={downloadProgress} />
+          </Box>
+          <Typography variant="caption" color="text.secondary">
+            {downloadProgress.toFixed(1)}%
+          </Typography>
+        </DialogContent>
+      </Dialog>
+      <Snackbar
+        open={updateInfoOpen}
+        autoHideDuration={3500}
+        onClose={() => setUpdateInfoOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => setUpdateInfoOpen(false)}
+          severity={updateInfoSeverity}
+        >
+          {updateInfoMsg}
+        </MuiAlert>
+      </Snackbar>
     </>
   )
 }

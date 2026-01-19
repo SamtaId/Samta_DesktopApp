@@ -1,5 +1,12 @@
 import React, { JSX, useEffect } from 'react'
-import { MemoryRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate
+} from 'react-router-dom'
 import { Box } from '@mui/material'
 import { appRoutes } from './routes/appRoutes'
 import { IAppRoute } from './interface/config.interface'
@@ -18,6 +25,28 @@ interface LoginOnlyLayoutProps {
 
 const LoginOnlyLayout = ({ children }: LoginOnlyLayoutProps): JSX.Element => {
   const token = getToken()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      const { key, altKey, ctrlKey } = e
+
+      if (key === 'F4' && altKey) e.preventDefault()
+      if (key === 'F5') e.preventDefault()
+      if (key === 'f' && altKey) e.preventDefault()
+      if (key === 'F11') e.preventDefault()
+      if (key === 'r' && ctrlKey) {
+        e.preventDefault()
+        window.location.reload()
+      }
+      if (key === 'i' && ctrlKey) {
+        e.preventDefault()
+        navigate('/xyz/info')
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   if (token) {
     return <Navigate to="/dashboard" replace />
@@ -26,7 +55,7 @@ const LoginOnlyLayout = ({ children }: LoginOnlyLayoutProps): JSX.Element => {
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <div className="flex-shrink-0">
-        <TitleBar username="" />
+        <TitleBar username="" showUpdateButton />
       </div>
       <main className="p-0 m-0 flex-1 flex items-center justify-center bg-slate-100 dark:bg-slate-900 overflow-auto">
         <div className="w-full h-full flex items-center justify-center">{children}</div>

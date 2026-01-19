@@ -1,6 +1,6 @@
 {
   "name": "samta",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -63,8 +63,16 @@
   },
   "build": {
     "productName": "Samta",
-    "appId": "Samta",
+    "appId": "com.samta.desktop",
     "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "SamtaId",
+        "repo": "Samta_DesktopApp",
+        "private": true
+      }
+    ],
     "directories": {
       "buildResources": "resources"
     },

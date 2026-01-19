@@ -5,7 +5,6 @@ import TransactionService from '@renderer/services/transactionService'
 import { AxiosError } from 'axios'
 import { useEffect, useState } from 'react'
 import { formatRupiah } from '@renderer/utils/myFunctions'
-import { statusTransaction } from '@renderer/utils/dataStatus'
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { Box, Typography, Chip } from '@mui/material'
 // import { Visibility as ViewIcon, Delete as DeleteIcon } from '@mui/icons-material'
@@ -112,7 +111,7 @@ export const UseIndex = () => {
       minWidth: 120,
       renderCell: (params) => (
         <Chip
-          label={statusTransaction[params.row.status].label.toUpperCase()}
+          label={params.row.status}
           size="small"
           sx={{
             bgcolor: 'grey.100',
