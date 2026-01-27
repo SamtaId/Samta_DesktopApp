@@ -96,7 +96,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <TitleBar username={userData?.name || ''} />
+      <TitleBar username={userData?.name || ''} onLogout={handleLogout} />
 
       <Sidebar logo={`${assetsPathConfig}\\images\\logo.png`} onLogout={handleLogout} />
 

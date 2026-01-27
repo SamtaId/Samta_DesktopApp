@@ -3,6 +3,7 @@ import { useNotifier } from '@renderer/components/core/NotificationProvider'
 import { buildReceiptHTML } from '@renderer/components/core/printTransaction'
 import { ITransaction } from '@renderer/interface/transaction.interface'
 import TransactionService from '@renderer/services/transactionService'
+import { formatDateTime } from '@renderer/utils/myFunctions'
 import { useState, useMemo, useEffect, useRef } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -47,8 +48,8 @@ export const useIndex = () => {
   const printOrder = (order: ITransaction) => {
     try {
       const header1 = localStorage.getItem('outletName') || 'Outlet'
-      const header2 = 'New Order'
-      const header3 = `Meja: ${(order.tables && order.tables.length > 0 && order.tables[0]?.name) || '-'} | ${order.date ? new Date(order.date).toLocaleString('id-ID') : '-'}`
+      const header2 = 'Checking Order'
+      const header3 = `Meja: ${(order.tables && order.tables.length > 0 && order.tables[0]?.name) || '-'} | ${order.date ? formatDateTime(order.date) : '-'}`
       const dataToprint = {
         header1,
         header2,

@@ -225,34 +225,40 @@ export const CreateTransactionPage: React.FC = () => {
                     <Box sx={{ position: 'relative' }}>
                       <Box
                         sx={{
-                          height: 140,
+                          height: 200,
                           bgcolor: 'grey.100',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '4rem'
+                          overflow: 'hidden' // penting
                         }}
                       >
                         <ImageDefault
                           url={(product.images.length > 0 && product.images[0].url) || null}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover' // atau 'contain'
+                          }}
                         />
                       </Box>
                     </Box>
+
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Typography variant="body2" fontWeight={600} gutterBottom>
-                        {product.name}
+                        {product && product.name}
                       </Typography>
                       <Typography variant="body1" color="#C3A86D" fontWeight={700} gutterBottom>
-                        {formatRupiah(product.sellingPrice)}
+                        {formatRupiah(product && product.sellingPrice)}
                       </Typography>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                      {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                         <Typography variant="caption" color="text.secondary">
-                          {product.unit || '-'}
+                          {(product && product.unit) || '-'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           1x
                         </Typography>
-                      </Box>
+                      </Box> */}
                       <Button
                         fullWidth
                         variant="contained"
@@ -403,11 +409,12 @@ export const CreateTransactionPage: React.FC = () => {
                   Select room...
                 </MenuItem>
 
-                {dataRooms.map((room) => (
-                  <MenuItem key={room.id} value={room.id}>
-                    {room.roomNumber} — {room.roomType?.name}
-                  </MenuItem>
-                ))}
+                {dataRooms &&
+                  dataRooms.map((room) => (
+                    <MenuItem key={room.id} value={room.id}>
+                      {room.roomNumber} — {room.roomType?.name}
+                    </MenuItem>
+                  ))}
               </Select>
             </Box>
           )}
@@ -450,12 +457,13 @@ export const CreateTransactionPage: React.FC = () => {
                   }
                 }}
               >
-                {dataTables.map((table) => (
-                  <MenuItem key={table.id} value={table.id}>
-                    <Checkbox checked={selectedTables.includes(table.id)} />
-                    <ListItemText primary={table.name} />
-                  </MenuItem>
-                ))}
+                {dataTables &&
+                  dataTables.map((table) => (
+                    <MenuItem key={table.id} value={table.id}>
+                      <Checkbox checked={selectedTables.includes(table.id)} />
+                      <ListItemText primary={table.name} />
+                    </MenuItem>
+                  ))}
               </Select>
             </Box>
           )}
@@ -463,50 +471,51 @@ export const CreateTransactionPage: React.FC = () => {
 
         {/* Cart Items */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
-          {cart.map((item) => (
-            <Paper
-              key={item.id}
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 2,
-                bgcolor: 'grey.50',
-                borderRadius: 2
-              }}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      bgcolor: 'white',
-                      fontSize: '1.5rem'
-                    }}
-                  >
-                    <ImageDefault url={(item.images.length > 0 && item.images[0].url) || null} />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="body2" fontWeight={600}>
-                      {item.name}
-                    </Typography>
-                    <Typography variant="body2" color="#C3A86D" fontWeight={600}>
-                      {formatRupiah(item.sellingPrice)}
-                    </Typography>
+          {cart &&
+            cart.map((item) => (
+              <Paper
+                key={item.id}
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  bgcolor: 'grey.50',
+                  borderRadius: 2
+                }}
+              >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        bgcolor: 'white',
+                        fontSize: '1.5rem'
+                      }}
+                    >
+                      <ImageDefault url={(item.images.length > 0 && item.images[0].url) || null} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight={600}>
+                        {item.name}
+                      </Typography>
+                      <Typography variant="body2" color="#C3A86D" fontWeight={600}>
+                        {formatRupiah(item.sellingPrice)}
+                      </Typography>
+                    </Box>
                   </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => removeFromCart(item.id)}
+                    sx={{ height: 'fit-content' }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
                 </Box>
-                <IconButton
-                  size="small"
-                  onClick={() => removeFromCart(item.id)}
-                  sx={{ height: 'fit-content' }}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                {/* <Button
+                <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                  {/* <Button
                   size="small"
                   startIcon={<EditIcon />}
                   sx={{
@@ -517,36 +526,36 @@ export const CreateTransactionPage: React.FC = () => {
                 >
                   Add notes
                 </Button> */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconButton
-                    size="small"
-                    onClick={() => updateQuantity(item.id, -1)}
-                    disabled={item.quantity <= 1}
-                  >
-                    <RemoveIcon fontSize="small" />
-                  </IconButton>
-                  <Typography
-                    variant="body2"
-                    fontWeight={600}
-                    sx={{ minWidth: 20, textAlign: 'center' }}
-                  >
-                    {item.quantity}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => updateQuantity(item.id, 1)}
-                    sx={{
-                      bgcolor: '#C3A86D',
-                      color: 'white',
-                      '&:hover': { bgcolor: '#b0a080' }
-                    }}
-                  >
-                    <AddIcon fontSize="small" />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => updateQuantity(item.id, -1)}
+                      disabled={item.quantity <= 1}
+                    >
+                      <RemoveIcon fontSize="small" />
+                    </IconButton>
+                    <Typography
+                      variant="body2"
+                      fontWeight={600}
+                      sx={{ minWidth: 20, textAlign: 'center' }}
+                    >
+                      {item.quantity}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() => updateQuantity(item.id, 1)}
+                      sx={{
+                        bgcolor: '#C3A86D',
+                        color: 'white',
+                        '&:hover': { bgcolor: '#b0a080' }
+                      }}
+                    >
+                      <AddIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </Box>
-              </Box>
-            </Paper>
-          ))}
+              </Paper>
+            ))}
         </Box>
 
         {/* Order Summary */}

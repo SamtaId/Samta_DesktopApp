@@ -1,7 +1,7 @@
 {
-  "api_url": "https://api.stag.samta.cloud",
+  "api_url": "https://api.samta.cloud",
   "ws_url": "http://192.168.4.110:3000/ws",
   "license": "4928935844",
   "auto_print_transaction": true,
-  "refresh_time_trx": 5000
+  "refresh_time_trx": 15000
 }

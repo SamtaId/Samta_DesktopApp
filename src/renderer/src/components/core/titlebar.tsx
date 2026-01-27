@@ -60,6 +60,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   // PROFILE MENU
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const openProfileMenu = Boolean(anchorEl)
+console.log('cc',currentOutletId);
 
   // Snackbar untuk update info
   const [updateInfoOpen, setUpdateInfoOpen] = useState(false)
@@ -86,14 +87,18 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChangeOutlet = (e: any): void => {
     const newId = e.target.value
-    setCurrentOutletId(newId)
     try {
       const userStr = localStorage.getItem('userLogin')
       if (userStr) {
         const user = JSON.parse(userStr)
         const newOutlet = (user.outlets || []).find((o: IOutlet) => o.id === newId)
+        setCurrentOutletId(newOutlet)
         if (newOutlet) {
           user.currentOutlet = newOutlet
+          console.log(newOutlet)
+
+          localStorage.setItem('outletId', newOutlet.id)
+          localStorage.setItem('outletName', newOutlet.name)
           localStorage.setItem('userLogin', JSON.stringify(user))
           window.location.reload()
         }
@@ -115,17 +120,6 @@ export const TitleBar: React.FC<TitleBarProps> = ({
     handleProfileMenuClose()
     // Navigate to settings page
     console.log('Navigate to settings')
-  }
-
-  const handleLogout = (): void => {
-    handleProfileMenuClose()
-    if (onLogout) {
-      onLogout()
-    } else {
-      localStorage.removeItem('token')
-      localStorage.removeItem('userLogin')
-      window.location.href = '/login'
-    }
   }
 
   useEffect(() => {
@@ -248,6 +242,8 @@ export const TitleBar: React.FC<TitleBarProps> = ({
                 inputProps={{ 'aria-label': 'Select Outlet' }}
                 renderValue={(selected) => {
                   const outlet = outlets.find((o) => o.id === selected.id)
+                  console.log('ss',outlet);
+                  
                   return (
                     <Box display="flex" alignItems="center" gap={1}>
                       <Store fontSize="small" />
@@ -256,14 +252,15 @@ export const TitleBar: React.FC<TitleBarProps> = ({
                   )
                 }}
               >
-                {outlets.map((outlet) => (
-                  <MenuItem key={outlet.id} value={outlet.id}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Store fontSize="small" />
-                      <span>{outlet.name}</span>
-                    </Box>
-                  </MenuItem>
-                ))}
+                {outlets &&
+                  outlets.map((outlet) => (
+                    <MenuItem key={outlet.id} value={outlet.id}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Store fontSize="small" />
+                        <span>{outlet.name}</span>
+                      </Box>
+                    </MenuItem>
+                  ))}
               </Select>
             )}
           </Box>
@@ -453,12 +450,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({
           <ListItemText>Settings</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: 'error.main' }}>
-          <ListItemIcon>
-            <Logout fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>Logout</ListItemText>
-        </MenuItem>
+        {onLogout && (
+          <MenuItem onClick={onLogout} sx={{ py: 1.5, color: 'error.main' }}>
+            <ListItemIcon>
+              <Logout fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>Logout</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
 
       <Dialog

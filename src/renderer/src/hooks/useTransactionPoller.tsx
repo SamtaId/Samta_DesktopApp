@@ -32,7 +32,7 @@ export const useTransactionPoller = (options: UseTransactionPollerOptions = {}) 
   const printOrder = useCallback((transaction: ITransaction) => {
     try {
       const header1 = localStorage.getItem('outletName') || 'Outlet'
-      const header2 = 'New Order'
+      const header2 = 'Checking Order'
       const header3 = `Meja: ${(transaction.tables && transaction.tables.length > 0 && transaction.tables[0]?.name) || '-'} | ${transaction.date ? new Date(transaction.date).toLocaleString('id-ID') : '-'}`
 
       const dataToprint = {
